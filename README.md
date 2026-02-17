@@ -244,3 +244,183 @@ df.dtypes
 
 All numeric columns are correctly stored as `int64`, so no conversion required.
 
+# 🔹 TASK 4 – Text Feature Engineering
+
+## 🎯 Objective
+
+Convert text columns into a clean format for machine learning processing.
+
+### Columns Used:
+
+- Skills  
+- Certifications  
+- Job Role  
+
+---
+
+## 🧠 Step 1: Combine Text Columns
+
+### Command Used:
+
+```python
+df['combined_text'] = df['Skills'] + " " + df['Certifications'] + " " + df['Job Role']
+```
+
+### 📌 Why We Did This:
+
+Instead of vectorizing 3 separate columns, we:
+
+- Combined them into one resume representation  
+- Made it easier for TF-IDF to capture relationships  
+- Simulated a real resume screening process  
+
+---
+
+## 🧠 Step 2: Text Cleaning
+
+### Command Used:
+
+```python
+import re
+
+def clean_text(text):
+    text = text.lower()
+    text = re.sub(r'[^a-zA-Z0-9\s]', '', text)
+    text = re.sub(r'\s+', ' ', text)
+    return text.strip()
+
+df['combined_text'] = df['combined_text'].apply(clean_text)
+```
+
+### 📌 Why We Cleaned Text:
+
+- Convert to lowercase → "Python" and "python" treated the same  
+- Remove special characters → remove noise  
+- Remove extra spaces → improve consistency  
+
+Without cleaning → TF-IDF creates duplicate features.
+
+---
+
+## ✅ Output After Cleaning
+
+When we ran:
+
+```python
+df['combined_text'].sample(3)
+```
+
+We saw clean text like:
+
+```
+python machine learning aws certified data scientist
+java spring backend developer
+cybersecurity ethical hacking linux engineer
+```
+
+### Meaning:
+
+✔ Cleaning worked  
+✔ No commas  
+✔ No uppercase  
+✔ No unwanted symbols  
+
+---
+
+# 🔹 TASK 5 – Convert Text to Numerical (TF-IDF)
+
+## 🎯 Objective
+
+Machine learning models understand numbers, not words.
+
+We converted text into numerical feature vectors.
+
+---
+
+## 🧠 Step 1: Apply TF-IDF
+
+### Command Used:
+
+```python
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+tfidf = TfidfVectorizer(max_features=500, stop_words='english')
+X_text = tfidf.fit_transform(df['combined_text'])
+```
+
+### 📌 Why TF-IDF?
+
+TF-IDF = **Term Frequency × Inverse Document Frequency**
+
+It:
+
+- Gives higher importance to rare but meaningful words  
+- Reduces importance of common words  
+- Highlights technical skills  
+- Performs better than simple word counting  
+
+---
+
+## 🧠 Step 2: Check Shape
+
+### Command Used:
+
+```python
+X_text.shape
+```
+
+### Output:
+
+```
+(1000, 28)
+```
+
+### 📌 What This Means
+
+- 1000 resumes  
+- 28 meaningful technical keywords extracted  
+
+Your dataset had **28 strong resume features**.
+
+That’s GOOD — not too noisy, not too large.
+
+---
+
+## 🧠 Step 3: Check Extracted Words
+
+### Command Used:
+
+```python
+tfidf.get_feature_names_out()
+```
+
+### Output:
+
+```
+['ai', 'analyst', 'aws', 'certification', 'certified',
+ 'cybersecurity', 'data', 'deep', 'engineer', 'ethical',
+ 'google', 'hacking', 'java', 'learning', 'linux',
+ 'machine', 'ml', 'networking', 'nlp',
+ 'python', 'pytorch', 'react', 'researcher',
+ 'scientist', 'software', 'specialization',
+ 'sql', 'tensorflow']
+```
+
+---
+
+## 📌 Why This Output Is Excellent
+
+These are:
+
+✔ Programming Skills → python, java, sql  
+✔ AI Skills → machine, tensorflow, pytorch  
+✔ Cybersecurity → hacking, ethical, networking  
+✔ Job Roles → analyst, engineer, scientist  
+
+This shows:
+
+- Model is learning REAL hiring signals  
+- Feature engineering is meaningful  
+- Dataset cleaning worked perfectly  
+
+
